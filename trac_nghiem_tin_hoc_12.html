@@ -1,0 +1,534 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trắc nghiệm Tin học 12 — Kết nối tri thức</title>
+<style>
+:root{
+  --bg:#eef1f8;
+  --ink:#0f172a;
+  --muted:#475569;
+  --accent:#4338ca;
+  --card:#ffffff;
+  --ok:#166534;
+  --ok-bg:#dcfce7;
+  --bad:#991b1b;
+  --bad-bg:#fee2e2;
+  --border:#c7d0e0;
+  --opt-bg:#f1f5f9;
+}
+html{color-scheme:light only}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  background:var(--bg);
+  color:var(--ink);
+  min-height:100vh;
+  -webkit-text-fill-color:var(--ink);
+}
+main{max-width:760px;margin:0 auto;padding:22px 16px 40px}
+h1{font-size:clamp(1.45rem,4vw,2.1rem);margin:0 0 6px;color:#0f172a}
+.sub{color:var(--muted);margin:0 0 20px}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+select,button{font:inherit;border:0;border-radius:12px;padding:11px 14px;cursor:pointer}
+select{
+  background:#fff;
+  color:#0f172a;
+  border:1.5px solid var(--border);
+  flex:1;min-width:180px;
+}
+button{background:var(--accent);color:#fff;font-weight:650}
+button.secondary{
+  background:#fff;
+  color:#0f172a;
+  border:1.5px solid var(--border);
+}
+button:disabled{opacity:.55;cursor:not-allowed}
+.stats{display:flex;justify-content:space-between;color:var(--muted);font-size:.92rem;margin:10px 2px;gap:8px;flex-wrap:wrap}
+.progress{height:6px;background:#d0d7e8;border-radius:9px;overflow:hidden;margin-bottom:16px}
+#bar{height:100%;width:0;background:var(--accent);transition:width .2s}
+.card{
+  background:var(--card);
+  border:1.5px solid var(--border);
+  border-radius:24px;
+  box-shadow:0 8px 24px rgba(15,23,42,.08);
+  padding:24px 22px 20px;
+  min-height:320px;
+  color:#0f172a;
+}
+.q-label{font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);font-weight:800;margin-bottom:10px}
+.question{
+  font-size:clamp(1.15rem,3.6vw,1.55rem);
+  line-height:1.45;
+  font-weight:700;
+  margin:0 0 18px;
+  color:#0f172a;
+}
+.options{display:grid;gap:10px}
+.opt{
+  display:flex;align-items:flex-start;gap:12px;text-align:left;
+  background:var(--opt-bg);
+  border:1.5px solid var(--border);
+  border-radius:14px;
+  padding:12px 14px;
+  cursor:pointer;
+  transition:border-color .15s,background .15s;
+  font-weight:600;
+  line-height:1.45;
+  color:#0f172a;
+  -webkit-text-fill-color:#0f172a;
+}
+.opt:hover:not(.disabled){border-color:#818cf8;background:#e0e7ff}
+.opt .letter{
+  flex:0 0 28px;height:28px;border-radius:8px;
+  background:#c7d2fe;color:#312e81;
+  display:grid;place-items:center;font-weight:800;font-size:.9rem;
+}
+.opt.correct{background:var(--ok-bg);border-color:#4ade80;color:#14532d}
+.opt.correct .letter{background:#166534;color:#fff}
+.opt.wrong{background:var(--bad-bg);border-color:#f87171;color:#7f1d1d}
+.opt.wrong .letter{background:#991b1b;color:#fff}
+.opt.disabled{cursor:default}
+.feedback{
+  margin-top:14px;padding:12px 14px;border-radius:12px;font-size:.95rem;line-height:1.45;
+  display:none;font-weight:600;
+}
+.feedback.show{display:block}
+.feedback.ok{background:var(--ok-bg);color:#14532d}
+.feedback.bad{background:var(--bad-bg);color:#7f1d1d}
+.controls{display:grid;grid-template-columns:1fr 1.2fr 1fr;gap:8px;margin-top:16px}
+.controls button{min-height:48px}
+.bottom{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.note{font-size:.86rem;line-height:1.5;color:var(--muted);margin-top:20px}
+@media(max-width:420px){
+  .card{padding:18px 14px}
+  .opt{padding:11px 12px}
+  .controls button{padding:10px 5px;font-size:.92rem}
+}
+</style>
+</head>
+<body>
+<main>
+  <h1>Trắc nghiệm Tin học 12</h1>
+  <p class="sub">Kết nối tri thức · Ôn giữa HK1 · Bài 1, 2, 3, 4 và 6 · Dạng chọn A B C D</p>
+
+  <div class="toolbar">
+    <select id="lesson" aria-label="Chọn bài">
+      <option value="all">Tất cả các bài</option>
+      <option value="Bài 1">Bài 1 — Làm quen với AI</option>
+      <option value="Bài 2">Bài 2 — AI trong khoa học và đời sống</option>
+      <option value="Bài 3">Bài 3 — Thiết bị mạng</option>
+      <option value="Bài 4">Bài 4 — Giao thức mạng</option>
+      <option value="Bài 6">Bài 6 — Ứng xử trong không gian mạng</option>
+    </select>
+    <button class="secondary" id="shuffle">🔀 Trộn câu</button>
+  </div>
+
+  <div class="stats">
+    <span id="count">Câu 1 / 41</span>
+    <span id="score">Đúng: 0 · Sai: 0</span>
+    <span id="known">Đã nhớ: 0</span>
+  </div>
+  <div class="progress"><div id="bar"></div></div>
+
+  <div class="card">
+    <div class="q-label" id="qlabel">Bài 1</div>
+    <p class="question" id="qtext">...</p>
+    <div class="options" id="options"></div>
+    <div class="feedback" id="feedback"></div>
+  </div>
+
+  <div class="controls">
+    <button class="secondary" id="prev">← Trước</button>
+    <button id="next">Tiếp →</button>
+    <button class="secondary" id="reveal">Hiện đáp án</button>
+  </div>
+
+  <div class="bottom">
+    <button class="secondary" id="remember">✓ Đã nhớ câu này</button>
+    <button class="secondary" id="reset">Đặt lại tiến độ</button>
+  </div>
+
+  <p class="note">Mẹo: đọc kỹ câu hỏi rồi chọn A/B/C/D. Sau khi chọn sẽ hiện đúng/sai. Dùng phím 1–4 (hoặc A–D) để chọn nhanh, ←/→ để chuyển câu, phím cách để hiện đáp án.</p>
+</main>
+
+<script>
+/* Mỗi phần tử: [bài, câu hỏi, đáp án đúng, [A,B,C,D] đã xáo (đáp án đúng nằm trong mảng)] */
+const raw = [
+  // ===== Bài 1 =====
+  ["Bài 1","AI là gì?","AI là viết tắt của Artificial Intelligence, nghĩa là trí tuệ nhân tạo.",
+   ["AI là viết tắt của Artificial Intelligence, nghĩa là trí tuệ nhân tạo.",
+    "AI là viết tắt của Automatic Information, nghĩa là thông tin tự động.",
+    "AI là tên của một hệ điều hành máy tính.",
+    "AI chỉ là tên gọi chung của robot."]],
+  ["Bài 1","AI được định nghĩa thế nào?","Khả năng của máy tính thực hiện những nhiệm vụ thường đòi hỏi trí tuệ con người.",
+   ["Khả năng của máy tính thực hiện những nhiệm vụ thường đòi hỏi trí tuệ con người.",
+    "Khả năng máy tính chạy nhanh hơn con người về mọi mặt.",
+    "Phần mềm chỉ dùng để chơi game và giải trí.",
+    "Hệ thống chỉ lưu trữ dữ liệu mà không xử lí."]],
+  ["Bài 1","Thuật ngữ AI được đề xuất tại hội thảo nào, năm nào?","Hội thảo Dartmouth năm 1956.",
+   ["Hội thảo Dartmouth năm 1956.",
+    "Hội thảo Stanford năm 1965.",
+    "Hội thảo MIT năm 1945.",
+    "Hội thảo Oxford năm 1972."]],
+  ["Bài 1","Kể tên một số khả năng cơ bản của AI.","Học, suy luận, nhận thức và giải quyết vấn đề.",
+   ["Học, suy luận, nhận thức và giải quyết vấn đề.",
+    "Chỉ ghi nhớ dữ liệu và in ấn.",
+    "Chỉ chạy theo lệnh cứng, không học được.",
+    "Chỉ vẽ hình và phát nhạc."]],
+  ["Bài 1","AI yếu là gì?","AI được thiết kế để thực hiện một nhiệm vụ hoặc nhóm nhiệm vụ cụ thể.",
+   ["AI được thiết kế để thực hiện một nhiệm vụ hoặc nhóm nhiệm vụ cụ thể.",
+    "AI có trí tuệ ngang bằng hoặc vượt con người ở mọi lĩnh vực.",
+    "AI chỉ tồn tại trong phim khoa học viễn tưởng.",
+    "AI không cần dữ liệu để hoạt động."]],
+  ["Bài 1","AI mạnh là gì?","Khái niệm về AI có trí tuệ tổng quát tương đương con người; đây chưa phải năng lực mà AI hiện nay đã đạt được.",
+   ["Khái niệm về AI có trí tuệ tổng quát tương đương con người; đây chưa phải năng lực mà AI hiện nay đã đạt được.",
+    "AI chỉ làm được một việc duy nhất như nhận diện ảnh.",
+    "AI mạnh là robot có hình dạng con người.",
+    "AI mạnh là phần mềm diệt virus."]],
+  ["Bài 1","AI có giống robot không?","Không. AI là công nghệ; robot là thiết bị vật lí. Robot có thể có hoặc không có AI.",
+   ["Không. AI là công nghệ; robot là thiết bị vật lí. Robot có thể có hoặc không có AI.",
+    "Có, AI và robot là một.",
+    "Robot luôn phải có AI mới hoạt động được.",
+    "AI chỉ tồn tại bên trong robot."]],
+  ["Bài 1","AI có luôn chính xác không?","Không. AI có thể sai do dữ liệu, giới hạn mô hình hoặc cách sử dụng.",
+   ["Không. AI có thể sai do dữ liệu, giới hạn mô hình hoặc cách sử dụng.",
+    "Có, AI luôn cho kết quả đúng 100%.",
+    "AI chỉ sai khi mất điện.",
+    "AI không bao giờ mắc lỗi nếu được lập trình đúng."]],
+
+  // ===== Bài 2 =====
+  ["Bài 2","AI hỗ trợ y tế như thế nào?","Phân tích ảnh y khoa, phát hiện dấu hiệu bất thường và hỗ trợ bác sĩ.",
+   ["Phân tích ảnh y khoa, phát hiện dấu hiệu bất thường và hỗ trợ bác sĩ.",
+    "Thay thế hoàn toàn bác sĩ trong mọi ca phẫu thuật.",
+    "Chỉ dùng để đặt lịch khám bệnh.",
+    "Chỉ ghi sổ bệnh án giấy."]],
+  ["Bài 2","AI được dùng trong giáo dục ra sao?","Cá nhân hóa việc học, gợi ý bài tập và hỗ trợ giải đáp câu hỏi.",
+   ["Cá nhân hóa việc học, gợi ý bài tập và hỗ trợ giải đáp câu hỏi.",
+    "Thay thế hoàn toàn giáo viên trên lớp.",
+    "Chỉ dùng để chấm điểm trắc nghiệm.",
+    "Không liên quan đến học tập."]],
+  ["Bài 2","AI có thể giúp gì trong giao thông?","Hỗ trợ nhận diện phương tiện, dự báo giao thông và các hệ thống hỗ trợ lái xe.",
+   ["Hỗ trợ nhận diện phương tiện, dự báo giao thông và các hệ thống hỗ trợ lái xe.",
+    "Tự động sửa đường và xây cầu.",
+    "Chỉ dùng để bán vé xe buýt.",
+    "Không có ứng dụng trong giao thông."]],
+  ["Bài 2","AI có thể ứng dụng trong nông nghiệp thế nào?","Theo dõi cây trồng, nhận diện sâu bệnh và tối ưu hóa tưới tiêu.",
+   ["Theo dõi cây trồng, nhận diện sâu bệnh và tối ưu hóa tưới tiêu.",
+    "Thay thế hoàn toàn nông dân trên đồng ruộng.",
+    "Chỉ dùng để bán nông sản online.",
+    "Không có ứng dụng trong nông nghiệp."]],
+  ["Bài 2","Nêu một số lợi ích của AI.","Tự động hóa công việc, xử lí dữ liệu lớn, tăng hiệu quả và hỗ trợ ra quyết định.",
+   ["Tự động hóa công việc, xử lí dữ liệu lớn, tăng hiệu quả và hỗ trợ ra quyết định.",
+    "Làm cho con người lười biếng và không cần học.",
+    "Chỉ tạo ra game và phim ảnh.",
+    "Không mang lại lợi ích thực tế nào."]],
+  ["Bài 2","Nêu một số rủi ro của AI.","Thông tin sai lệch, thiên vị dữ liệu, xâm phạm quyền riêng tư và ảnh hưởng đến việc làm.",
+   ["Thông tin sai lệch, thiên vị dữ liệu, xâm phạm quyền riêng tư và ảnh hưởng đến việc làm.",
+    "AI luôn an toàn và không có rủi ro.",
+    "Rủi ro duy nhất là máy tính nóng lên.",
+    "AI chỉ rủi ro khi mất kết nối Internet."]],
+  ["Bài 2","Vì sao cần kiểm chứng câu trả lời của AI?","Vì AI có thể tạo ra thông tin sai hoặc thiếu căn cứ.",
+   ["Vì AI có thể tạo ra thông tin sai hoặc thiếu căn cứ.",
+    "Vì AI luôn trả lời đúng nên không cần kiểm chứng.",
+    "Vì luật pháp bắt buộc phải kiểm chứng mọi câu trả lời.",
+    "Vì AI không hiểu tiếng Việt."]],
+
+  // ===== Bài 3 =====
+  ["Bài 3","Mạng máy tính là gì?","Hệ thống các thiết bị được kết nối để trao đổi dữ liệu và chia sẻ tài nguyên.",
+   ["Hệ thống các thiết bị được kết nối để trao đổi dữ liệu và chia sẻ tài nguyên.",
+    "Một chiếc máy tính đơn lẻ không kết nối gì cả.",
+    "Phần mềm diệt virus trên máy tính.",
+    "Cáp điện dùng để sạc pin."]],
+  ["Bài 3","Hub làm gì?","Kết nối thiết bị trong LAN và thường phát tín hiệu nhận được ra các cổng còn lại.",
+   ["Kết nối thiết bị trong LAN và thường phát tín hiệu nhận được ra các cổng còn lại.",
+    "Định tuyến gói tin giữa các mạng dựa trên địa chỉ IP.",
+    "Chỉ dùng để kết nối Internet không dây.",
+    "Lưu trữ dữ liệu đám mây."]],
+  ["Bài 3","Switch làm gì?","Kết nối thiết bị trong LAN và chuyển tiếp khung dữ liệu đến cổng phù hợp dựa trên địa chỉ MAC.",
+   ["Kết nối thiết bị trong LAN và chuyển tiếp khung dữ liệu đến cổng phù hợp dựa trên địa chỉ MAC.",
+    "Phát tín hiệu nhận được ra tất cả các cổng còn lại như hub.",
+    "Chỉ dùng để kết nối máy in.",
+    "Định tuyến giữa các mạng Internet."]],
+  ["Bài 3","Router làm gì?","Định tuyến và chuyển tiếp gói tin giữa các mạng dựa trên địa chỉ IP.",
+   ["Định tuyến và chuyển tiếp gói tin giữa các mạng dựa trên địa chỉ IP.",
+    "Chỉ kết nối thiết bị trong cùng một LAN bằng địa chỉ MAC.",
+    "Chỉ điều chế tín hiệu qua đường điện thoại.",
+    "Chỉ dùng làm điểm truy cập Wi-Fi."]],
+  ["Bài 3","Modem có chức năng gì?","Điều chế và giải điều chế tín hiệu để truyền dữ liệu qua một loại đường truyền.",
+   ["Điều chế và giải điều chế tín hiệu để truyền dữ liệu qua một loại đường truyền.",
+    "Chuyển tiếp khung dữ liệu theo địa chỉ MAC.",
+    "Tạo mạng không dây cho nhiều thiết bị.",
+    "Lưu trữ địa chỉ IP của toàn bộ Internet."]],
+  ["Bài 3","Access Point là gì?","Điểm truy cập không dây cho phép thiết bị kết nối Wi‑Fi vào mạng.",
+   ["Điểm truy cập không dây cho phép thiết bị kết nối Wi‑Fi vào mạng.",
+    "Thiết bị chỉ dùng để nối cáp Ethernet.",
+    "Phần mềm quản lí mật khẩu Wi-Fi.",
+    "Card mạng có dây."]],
+  ["Bài 3","Card mạng có chức năng gì?","Giúp thiết bị kết nối và giao tiếp với mạng qua Ethernet hoặc Wi‑Fi.",
+   ["Giúp thiết bị kết nối và giao tiếp với mạng qua Ethernet hoặc Wi‑Fi.",
+    "Chỉ dùng để tăng tốc độ CPU.",
+    "Chỉ lưu trữ hệ điều hành.",
+    "Chỉ dùng để kết nối máy chiếu."]],
+  ["Bài 3","Hub khác switch thế nào?","Hub thường phát tín hiệu ra các cổng còn lại; switch chuyển tiếp dữ liệu đến cổng phù hợp.",
+   ["Hub thường phát tín hiệu ra các cổng còn lại; switch chuyển tiếp dữ liệu đến cổng phù hợp.",
+    "Hub và switch hoạt động hoàn toàn giống nhau.",
+    "Switch luôn chậm hơn hub.",
+    "Hub dùng địa chỉ IP còn switch dùng địa chỉ MAC."]],
+
+  // ===== Bài 4 =====
+  ["Bài 4","Giao thức mạng là gì?","Tập hợp quy tắc quy định cách các thiết bị trao đổi dữ liệu.",
+   ["Tập hợp quy tắc quy định cách các thiết bị trao đổi dữ liệu.",
+    "Tên của một loại cáp mạng.",
+    "Phần cứng dùng để kết nối Internet.",
+    "Mật khẩu của mạng Wi-Fi."]],
+  ["Bài 4","Vì sao cần giao thức mạng?","Để các thiết bị tuân theo quy tắc chung và trao đổi dữ liệu đúng cách.",
+   ["Để các thiết bị tuân theo quy tắc chung và trao đổi dữ liệu đúng cách.",
+    "Để máy tính chạy nhanh hơn.",
+    "Để tiết kiệm điện năng.",
+    "Để thay thế hoàn toàn hệ điều hành."]],
+  ["Bài 4","TCP/IP là gì?","Bộ giao thức nền tảng cho Internet và nhiều mạng máy tính.",
+   ["Bộ giao thức nền tảng cho Internet và nhiều mạng máy tính.",
+    "Tên của một loại modem.",
+    "Phần mềm diệt virus phổ biến.",
+    "Một chuẩn màn hình máy tính."]],
+  ["Bài 4","IP làm gì?","Đảm nhiệm địa chỉ IP và chuyển tiếp gói tin qua các mạng.",
+   ["Đảm nhiệm địa chỉ IP và chuyển tiếp gói tin qua các mạng.",
+    "Đảm bảo truyền dữ liệu tin cậy và đúng thứ tự.",
+    "Chỉ dùng để phân giải tên miền.",
+    "Chỉ mã hóa dữ liệu trên web."]],
+  ["Bài 4","TCP làm gì?","Cung cấp dịch vụ truyền dữ liệu tin cậy, có kiểm soát thứ tự và xử lí mất dữ liệu.",
+   ["Cung cấp dịch vụ truyền dữ liệu tin cậy, có kiểm soát thứ tự và xử lí mất dữ liệu.",
+    "Chỉ gán địa chỉ cho thiết bị trong mạng.",
+    "Chỉ dùng để gửi email.",
+    "Chỉ chuyển tiếp gói tin theo địa chỉ MAC."]],
+  ["Bài 4","DNS là gì?","Hệ thống phân giải tên miền thành địa chỉ IP tương ứng khi cần.",
+   ["Hệ thống phân giải tên miền thành địa chỉ IP tương ứng khi cần.",
+    "Giao thức truyền file giữa hai máy tính.",
+    "Hệ thống bảo mật tường lửa.",
+    "Tên của một loại cáp quang."]],
+  ["Bài 4","HTTP là gì?","Giao thức dùng để trao đổi dữ liệu trong mô hình web.",
+   ["Giao thức dùng để trao đổi dữ liệu trong mô hình web.",
+    "Giao thức dùng để gửi email.",
+    "Giao thức định tuyến giữa các mạng.",
+    "Hệ thống phân giải tên miền."]],
+  ["Bài 4","HTTPS khác HTTP thế nào?","HTTPS sử dụng TLS để bảo vệ kết nối, mã hóa dữ liệu trao đổi và hỗ trợ xác thực máy chủ.",
+   ["HTTPS sử dụng TLS để bảo vệ kết nối, mã hóa dữ liệu trao đổi và hỗ trợ xác thực máy chủ.",
+    "HTTPS chậm hơn HTTP nhưng không an toàn hơn.",
+    "HTTPS và HTTP hoàn toàn giống nhau.",
+    "HTTPS chỉ dùng cho email."]],
+  ["Bài 4","TCP khác IP thế nào?","TCP hỗ trợ truyền dữ liệu tin cậy; IP xử lí địa chỉ và chuyển tiếp gói tin.",
+   ["TCP hỗ trợ truyền dữ liệu tin cậy; IP xử lí địa chỉ và chuyển tiếp gói tin.",
+    "TCP và IP làm đúng một việc giống nhau.",
+    "IP tin cậy hơn TCP.",
+    "TCP chỉ dùng để đặt tên miền."]],
+
+  // ===== Bài 6 =====
+  ["Bài 6","Nêu các hình thức giao tiếp trực tuyến.","Email, tin nhắn, mạng xã hội, diễn đàn, gọi video và học trực tuyến.",
+   ["Email, tin nhắn, mạng xã hội, diễn đàn, gọi video và học trực tuyến.",
+    "Chỉ có gọi điện thoại cố định.",
+    "Chỉ có gửi thư giấy.",
+    "Chỉ có họp trực tiếp."]],
+  ["Bài 6","Ưu điểm của giao tiếp trên mạng là gì?","Trao đổi nhanh, thuận tiện, vượt khoảng cách địa lí và dễ chia sẻ thông tin.",
+   ["Trao đổi nhanh, thuận tiện, vượt khoảng cách địa lí và dễ chia sẻ thông tin.",
+    "Luôn an toàn tuyệt đối, không có rủi ro.",
+    "Chậm hơn giao tiếp trực tiếp.",
+    "Không thể chia sẻ file."]],
+  ["Bài 6","Rủi ro của giao tiếp trên mạng là gì?","Hiểu lầm, lừa đảo, bắt nạt trực tuyến, tin giả và xâm phạm quyền riêng tư.",
+   ["Hiểu lầm, lừa đảo, bắt nạt trực tuyến, tin giả và xâm phạm quyền riêng tư.",
+    "Không có rủi ro nào cả.",
+    "Chỉ rủi ro khi mất điện.",
+    "Rủi ro duy nhất là máy tính hết pin."]],
+  ["Bài 6","Ứng xử văn minh trên mạng là gì?","Tôn trọng người khác, dùng ngôn từ phù hợp và chịu trách nhiệm về hành vi của mình.",
+   ["Tôn trọng người khác, dùng ngôn từ phù hợp và chịu trách nhiệm về hành vi của mình.",
+    "Nói gì cũng được vì không ai biết mình là ai.",
+    "Chia sẻ thông tin cá nhân của người khác tự do.",
+    "Bắt nạt người khác để giải trí."]],
+  ["Bài 6","Nhận tin chưa xác minh thì nên làm gì?","Kiểm tra nguồn, đối chiếu thông tin và không chia sẻ vội vàng.",
+   ["Kiểm tra nguồn, đối chiếu thông tin và không chia sẻ vội vàng.",
+    "Chia sẻ ngay để mọi người biết.",
+    "Tin ngay và làm theo.",
+    "Xóa tin và không quan tâm."]],
+  ["Bài 6","Vì sao cần bảo vệ thông tin cá nhân?","Để giảm nguy cơ bị lừa đảo, chiếm tài khoản hoặc sử dụng dữ liệu trái phép.",
+   ["Để giảm nguy cơ bị lừa đảo, chiếm tài khoản hoặc sử dụng dữ liệu trái phép.",
+    "Vì thông tin cá nhân không quan trọng.",
+    "Vì luật pháp cấm dùng Internet.",
+    "Vì máy tính sẽ chạy chậm nếu chia sẻ thông tin."]],
+  ["Bài 6","Khi thấy bạn bị bắt nạt trực tuyến, nên làm gì?","Không hùa theo hay phát tán nội dung; báo cáo và tìm hỗ trợ từ người lớn đáng tin cậy.",
+   ["Không hùa theo hay phát tán nội dung; báo cáo và tìm hỗ trợ từ người lớn đáng tin cậy.",
+    "Tham gia bình luận để cổ vũ.",
+    "Chia sẻ thêm để nhiều người biết.",
+    "Im lặng và không làm gì cả."]],
+  ["Bài 6","Vì sao cần suy nghĩ trước khi đăng bài?","Nội dung có thể bị sao chép, lưu lại và lan truyền, ảnh hưởng đến bản thân và người khác.",
+   ["Nội dung có thể bị sao chép, lưu lại và lan truyền, ảnh hưởng đến bản thân và người khác.",
+    "Vì đăng bài sẽ làm máy tính nóng.",
+    "Vì Internet sẽ bị chậm.",
+    "Vì không ai đọc bài của mình."]],
+  ["Bài 6","Khi dùng nội dung của người khác cần lưu ý gì?","Tôn trọng quyền riêng tư, bản quyền; xin phép khi cần và ghi nguồn phù hợp.",
+   ["Tôn trọng quyền riêng tư, bản quyền; xin phép khi cần và ghi nguồn phù hợp.",
+    "Sao chép tự do vì trên mạng là miễn phí.",
+    "Không cần ghi nguồn.",
+    "Chỉ cần đổi tên tác giả là được."]]
+];
+
+/* Xáo thứ tự đáp án mỗi lần load / trộn */
+function shuffleOptions(arr){
+  const a = [...arr];
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+
+let deck = raw.map(q => {
+  const opts = shuffleOptions(q[3]);
+  return {lesson:q[0], question:q[1], answer:q[2], options:opts};
+});
+let index = 0;
+let correctCount = 0, wrongCount = 0;
+let known = new Set();
+let answered = new Map(); // key = question text, value = {chosen, isCorrect}
+
+const $ = id => document.getElementById(id);
+
+function render(){
+  if(!deck.length) return;
+  index = Math.max(0, Math.min(index, deck.length-1));
+  const q = deck[index];
+  $('qlabel').textContent = q.lesson;
+  $('qtext').textContent = q.question;
+  $('count').textContent = `Câu ${index+1} / ${deck.length}`;
+  $('score').textContent = `Đúng: ${correctCount} · Sai: ${wrongCount}`;
+  $('known').textContent = `Đã nhớ: ${known.size}`;
+  $('bar').style.width = `${((index+1)/deck.length)*100}%`;
+
+  const optsEl = $('options');
+  optsEl.innerHTML = '';
+  const letters = ['A','B','C','D'];
+  const prev = answered.get(q.question);
+
+  q.options.forEach((text, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'opt';
+    btn.type = 'button';
+    btn.innerHTML = `<span class="letter">${letters[i]}</span><span>${text}</span>`;
+    if(prev){
+      btn.classList.add('disabled');
+      if(text === q.answer) btn.classList.add('correct');
+      else if(text === prev.chosen) btn.classList.add('wrong');
+    } else {
+      btn.addEventListener('click', () => select(text));
+    }
+    optsEl.appendChild(btn);
+  });
+
+  const fb = $('feedback');
+  if(prev){
+    fb.className = 'feedback show ' + (prev.isCorrect ? 'ok' : 'bad');
+    fb.textContent = prev.isCorrect
+      ? '✓ Chính xác!'
+      : '✗ Chưa đúng. Đáp án đúng: ' + q.answer;
+  } else {
+    fb.className = 'feedback';
+    fb.textContent = '';
+  }
+}
+
+function select(chosen){
+  const q = deck[index];
+  if(answered.has(q.question)) return;
+  const isCorrect = chosen === q.answer;
+  answered.set(q.question, {chosen, isCorrect});
+  if(isCorrect) correctCount++;
+  else wrongCount++;
+  render();
+}
+
+function reveal(){
+  const q = deck[index];
+  if(answered.has(q.question)) return;
+  answered.set(q.question, {chosen: null, isCorrect: false});
+  wrongCount++;
+  render();
+}
+
+function change(n){
+  index = (index + n + deck.length) % deck.length;
+  render();
+}
+
+$('prev').addEventListener('click', () => change(-1));
+$('next').addEventListener('click', () => change(1));
+$('reveal').addEventListener('click', reveal);
+
+$('remember').addEventListener('click', () => {
+  known.add(deck[index].question);
+  $('known').textContent = `Đã nhớ: ${known.size}`;
+  $('remember').textContent = '✓ Đã đánh dấu';
+  setTimeout(() => $('remember').textContent = '✓ Đã nhớ câu này', 900);
+});
+
+$('lesson').addEventListener('change', () => {
+  const v = $('lesson').value;
+  const filtered = v === 'all'
+    ? raw
+    : raw.filter(c => c[0] === v);
+  deck = filtered.map(q => {
+    const opts = shuffleOptions(q[3]);
+    return {lesson:q[0], question:q[1], answer:q[2], options:opts};
+  });
+  index = 0;
+  answered.clear();
+  correctCount = 0;
+  wrongCount = 0;
+  render();
+});
+
+$('shuffle').addEventListener('click', () => {
+  for(let i = deck.length-1; i>0; i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [deck[i], deck[j]] = [deck[j], deck[i]];
+  }
+  // xáo lại đáp án trong mỗi câu
+  deck.forEach(q => { q.options = shuffleOptions(q.options); });
+  index = 0;
+  answered.clear();
+  correctCount = 0;
+  wrongCount = 0;
+  render();
+});
+
+$('reset').addEventListener('click', () => {
+  known.clear();
+  answered.clear();
+  correctCount = 0;
+  wrongCount = 0;
+  deck = raw.map(q => {
+    const opts = shuffleOptions(q[3]);
+    return {lesson:q[0], question:q[1], answer:q[2], options:opts};
+  });
+  $('lesson').value = 'all';
+  index = 0;
+  render();
+});
+
+document.addEventListener('keydown', e => {
+  if(['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName)) return;
+  if(e.code === 'Space'){ e.preventDefault(); reveal(); }
+  else if(e.key === 'ArrowRight') change(1);
+  else if(e.key === 'ArrowLeft') change(-1);
+  else if(['1','2','3','4'].includes(e.key) || ['a','b','c','d','A','B','C','D'].includes(e.key)){
+    const map = {1:0,2:1,3:2,4:3,a:0,b:1,c:2,d:3,A:0,B:1,C:2,D:3};
+    const i = map[e.key];
+    const q = deck[index];
+    if(q && !answered.has(q.question) && q.options[i]) select(q.options[i]);
+  }
+});
+
+render();
+</script>
+</body>
+</html>
